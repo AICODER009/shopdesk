@@ -1,0 +1,9 @@
+.env
+.env.*
+.venv
+**/node_modules
+**/__pycache__
+.pytest_cache
+.mypy_cache
+.ruff_cache
+src/shopdesk/static/widget

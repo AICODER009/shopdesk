@@ -1,0 +1,17 @@
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+.fastembed_cache/
+local_cache/
+node_modules/
+src/shopdesk/static/widget/
+data/*.db
+data/*.db-*

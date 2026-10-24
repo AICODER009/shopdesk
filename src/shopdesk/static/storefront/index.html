@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>__BRAND__</title>
+<link rel="preload" href="/dev/assets/fonts/fraunces-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/dev/assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+  /* Self-hosted: no request to Google's font CDN (GDPR). */
+  @font-face { font-family: "Fraunces"; src: url("/dev/assets/fonts/fraunces-latin-wght-normal.woff2") format("woff2-variations"); font-weight: 100 900; font-display: swap; }
+  @font-face { font-family: "Inter"; src: url("/dev/assets/fonts/inter-latin-wght-normal.woff2") format("woff2-variations"); font-weight: 100 900; font-display: swap; }
+
+  :root {
+    --ink: #191b1a; --muted: #5d625f; --faint: #8b908d; --line: #e3e1d9;
+    --paper: #f6f4ee; --card: #ffffff; --forest: #1f4d3f; --clay: #b5653d;
+    --display: "Fraunces", Georgia, serif; --text: "Inter", ui-sans-serif, system-ui, sans-serif;
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-font-smoothing: antialiased; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 400 15px/1.55 var(--text); }
+  a { color: inherit; }
+  img { display: block; max-width: 100%; height: auto; }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 0 40px; }
+
+  .announce { background: var(--forest); color: #e9efe9; text-align: center; padding: 9px 16px;
+    font-size: 11.5px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; }
+
+  header { border-bottom: 1px solid var(--line); background: rgba(246, 244, 238, 0.86);
+    backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 10; }
+  .bar { display: flex; align-items: center; justify-content: space-between; gap: 24px; height: 68px; }
+  .logo { font: 600 26px/1 var(--display); letter-spacing: -0.03em; text-decoration: none;
+    white-space: nowrap;
+    font-variation-settings: "SOFT" 50, "WONK" 1; }
+  nav { display: flex; gap: 28px; font-size: 14px; color: var(--muted); }
+  nav a { text-decoration: none; transition: color 150ms; }
+  nav a:hover { color: var(--ink); }
+  .account { font-size: 13.5px; color: var(--muted); white-space: nowrap; }
+  .account strong { color: var(--ink); font-weight: 600; }
+  .account a { color: var(--forest); font-weight: 550; text-underline-offset: 3px; }
+
+  .hero { display: grid; grid-template-columns: 1.05fr 1fr; gap: 56px; align-items: center;
+    padding: 64px 0 72px; }
+  .eyebrow { font-size: 12px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--clay); margin: 0 0 18px; }
+  h1 { font: 500 clamp(44px, 6vw, 82px)/1.02 var(--display); letter-spacing: -0.035em; margin: 0;
+    font-variation-settings: "SOFT" 30; text-wrap: balance; }
+  h1 em { font-style: italic; font-weight: 400; color: var(--forest); }
+  .lede { max-width: 30em; margin: 24px 0 34px; font-size: 17px; color: var(--muted); }
+  .ctas { display: flex; flex-wrap: wrap; gap: 12px; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; border: 0; border-radius: 999px;
+    padding: 14px 24px; font: 550 14.5px/1 var(--text); letter-spacing: 0.01em; cursor: pointer;
+    text-decoration: none; transition: transform 200ms var(--ease), background-color 150ms; }
+  .btn-dark { background: var(--ink); color: #fff; }
+  .btn-dark:hover { background: #000; transform: translateY(-1px); }
+  .btn-line { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1px #c9c6bb; }
+  .btn-line:hover { box-shadow: inset 0 0 0 1px var(--ink); }
+  .hero-media { position: relative; }
+  .hero-media img { width: 100%; aspect-ratio: 4 / 5; max-height: min(76vh, 680px);
+    object-fit: cover; object-position: 50% 60%; border-radius: 24px; }
+  .hero-tag { position: absolute; left: -28px; bottom: 36px; background: var(--card);
+    border-radius: 16px; padding: 14px 18px; box-shadow: 0 18px 40px -18px rgba(25, 27, 26, 0.35);
+    display: flex; gap: 12px; align-items: center; font-size: 13px; }
+  .hero-tag b { display: block; font-weight: 600; }
+  .hero-tag span { color: var(--muted); }
+  .pulse { width: 10px; height: 10px; border-radius: 50%; background: #2f9e62;
+    box-shadow: 0 0 0 4px rgba(47, 158, 98, 0.18); flex: none; }
+
+  .demo { display: grid; grid-template-columns: 1fr 1.4fr; gap: 40px; align-items: center;
+    background: var(--card); border: 1px solid var(--line); border-radius: 28px; padding: 40px 44px;
+    margin-bottom: 88px; }
+  .demo h2 { font: 500 34px/1.12 var(--display); letter-spacing: -0.025em; margin: 0 0 12px; }
+  .demo p { margin: 0; color: var(--muted); }
+  .prompts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .prompt { text-align: left; border: 1px solid var(--line); background: var(--paper);
+    border-radius: 16px; padding: 14px 16px; font: 500 14px/1.4 var(--text); color: var(--ink);
+    cursor: pointer; transition: border-color 150ms, transform 200ms var(--ease); }
+  .prompt small { display: block; margin-top: 4px; font-size: 11px; font-weight: 600;
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); }
+  .prompt:hover { border-color: var(--forest); transform: translateY(-2px); }
+
+  .section-head { display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 28px; }
+  .section-head h2 { font: 500 40px/1.1 var(--display); letter-spacing: -0.03em; margin: 0; }
+  .section-head a { font-size: 14px; color: var(--muted); text-underline-offset: 4px; }
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 96px; }
+  .product img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; border-radius: 18px;
+    background: #e8e5dc; transition: transform 500ms var(--ease); }
+  .product figure { margin: 0 0 14px; overflow: hidden; border-radius: 18px; }
+  .product:hover img { transform: scale(1.035); }
+  .product h3 { margin: 0; font-size: 15px; font-weight: 600; letter-spacing: -0.005em; }
+  .meta { display: flex; justify-content: space-between; margin-top: 2px; font-size: 14px;
+    color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  footer { border-top: 1px solid var(--line); padding: 28px 0 40px; font-size: 13px; color: var(--faint); }
+  footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+  @media (max-width: 960px) {
+    .hero, .demo { grid-template-columns: 1fr; }
+    .hero { padding-top: 40px; gap: 40px; }
+    .hero-tag { left: 16px; }
+    .grid { grid-template-columns: repeat(2, 1fr); }
+    nav { display: none; }
+  }
+  @media (max-width: 560px) {
+    .wrap { padding: 0 20px; }
+    .demo { padding: 28px 22px; }
+    .prompts { grid-template-columns: 1fr; }
+    .grid { gap: 16px; }
+    .section-head h2 { font-size: 30px; }
+    .logo { font-size: 21px; }
+    .bar { gap: 12px; }
+    .account { font-size: 12px; white-space: normal; text-align: right; line-height: 1.35; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="announce">Free delivery in Germany over €50 · 30-day returns · Gold members 60</div>
+<header>
+  <div class="wrap bar">
+    <a class="logo" href="/dev/storefront">__BRAND__</a>
+    <nav aria-label="Main"><a href="#shop">Shop</a><a href="#shop">New in</a><a href="#assistant">Help</a><a href="#shop">Journal</a></nav>
+    <p class="account">__ACCOUNT__</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <div>
+      <p class="eyebrow">Autumn · Winter 26</p>
+      <h1>Made for the <em>long way</em> round.</h1>
+      <p class="lede">Merino, waxed cotton and wool, cut to be worn for years. Questions about an
+        order or a return? Our assistant answers from our help centre, and hands you to a
+        person whenever you need one.</p>
+      <div class="ctas">
+        <a class="btn btn-dark" href="#shop">Shop the collection</a>
+        <button class="btn btn-line" type="button" data-ask="">Ask our assistant</button>
+      </div>
+    </div>
+    <div class="hero-media">
+      <img src="/dev/assets/img/hero.jpg" alt="Folded knitwear, jeans and leather boots laid out on white linen" width="1132" height="1600" fetchpriority="high">
+      <div class="hero-tag"><span class="pulse"></span><div><b>Support is online</b><span>Answers in seconds, people on hand</span></div></div>
+    </div>
+  </section>
+
+  <section class="demo" id="assistant" aria-labelledby="demo-title">
+    <div>
+      <p class="eyebrow">Try the assistant</p>
+      <h2 id="demo-title">Ask it anything a customer would.</h2>
+      <p>__DEMO_HINT__</p>
+    </div>
+    <div class="prompts">
+      <button class="prompt" type="button" data-ask="How long do I have to return a jumper?">How long do I have to return a jumper?<small>Help centre · cited</small></button>
+      <button class="prompt" type="button" data-ask="Where is my order 100245?">Where is my order 100245?<small>Live order lookup</small></button>
+      <button class="prompt" type="button" data-ask="The jacket from order 100198 ripped and it's past the return window. I want my money back.">My jacket ripped after the return window<small>Handoff to a person</small></button>
+      <button class="prompt" type="button" data-ask="Wie lange dauert die Lieferung nach Norwegen?">Wie lange dauert die Lieferung nach Norwegen?<small>Multilingual</small></button>
+    </div>
+  </section>
+
+  <section id="shop" aria-labelledby="shop-title">
+    <div class="section-head"><h2 id="shop-title">New this season</h2><a href="#shop">View all</a></div>
+    <div class="grid">
+      <article class="product"><figure><img src="/dev/assets/img/merino-tee.jpg" alt="Sage green merino T-shirts on wooden hangers" loading="lazy" width="900" height="1100"></figure>
+        <h3>Merino T-shirt</h3><p class="meta"><span>Sage · 4 colours</span><span>€44.95</span></p></article>
+      <article class="product"><figure><img src="/dev/assets/img/field-jacket.jpg" alt="Rust-coloured field jacket on a hanger" loading="lazy" width="900" height="1100"></figure>
+        <h3>Field jacket</h3><p class="meta"><span>Rust · waxed cotton</span><span>€149.00</span></p></article>
+      <article class="product"><figure><img src="/dev/assets/img/sweatshirt.jpg" alt="White organic cotton sweatshirt laid flat with sneakers" loading="lazy" width="900" height="1100"></figure>
+        <h3>Organic sweatshirt</h3><p class="meta"><span>Chalk · 3 colours</span><span>€69.00</span></p></article>
+      <article class="product"><figure><img src="/dev/assets/img/beanie.jpg" alt="Rust rib-knit beanie with knitwear and jeans" loading="lazy" width="900" height="1100"></figure>
+        <h3>Rib-knit beanie</h3><p class="meta"><span>Clay · lambswool</span><span>€29.00</span></p></article>
+    </div>
+  </section>
+</main>
+
+<footer><div class="wrap"><span>__BRAND__ is a demo storefront for the shopdesk support agent.</span><span>Photography: Unsplash</span></div></footer>
+
+<script>
+  if (new URLSearchParams(location.search).has("fresh")) {
+    try { sessionStorage.removeItem("shopdesk.conversation"); } catch (e) {}
+    history.replaceState(null, "", location.pathname);
+  }
+  // Demo convenience: the prompt cards open the widget with the question filled in.
+  document.addEventListener("click", function (e) {
+    var button = e.target.closest("[data-ask]");
+    if (!button) return;
+    var root = document.getElementById("shopdesk-widget");
+    var shadow = root && root.shadowRoot;
+    if (!shadow) return;
+    var launcher = shadow.querySelector(".sd-launcher");
+    if (launcher && launcher.getAttribute("aria-expanded") !== "true") launcher.click();
+    var question = button.getAttribute("data-ask");
+    if (!question) return;
+    setTimeout(function () {
+      var input = shadow.querySelector("textarea");
+      if (!input) return;
+      var setter = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "value").set;
+      setter.call(input, question);
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      input.focus();
+    }, 60);
+  });
+</script>
+<script src="/widget/shopdesk-widget.js?v=__WIDGET_VERSION__" data-api-base="__API_BASE__" data-token-url="/dev/token"
+        data-title="__BRAND__ support" data-greeting="Hi! How can we help today?" defer></script>
+</body>
+</html>
