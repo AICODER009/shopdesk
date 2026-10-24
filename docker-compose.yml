@@ -1,13 +1,57 @@
+# docker compose up -d --build                    app + workers on SQLite (single server)
+# docker compose --profile postgres up -d --build  same, plus a Postgres container
+#   (then set COMPOSE_DATABASE_URL=postgresql://shopdesk:shopdesk@postgres:5432/shopdesk)
+name: shopdesk
+
+x-app: &app
+  build: .
+  image: shopdesk:latest
+  env_file: .env
+  environment:
+    # SQLite on the shared volume by default; override to point every service at Postgres.
+    DATABASE_URL: ${COMPOSE_DATABASE_URL:-sqlite:///data/shopdesk.db}
+  volumes:
+    - shopdesk-data:/app/data
+  restart: unless-stopped
+
 services:
+  app:
+    <<: *app
+    ports:
+      - "8000:8000"
+
+  # Re-delivers handoffs that Zendesk rejected or couldn't take (dead-letter queue).
+  replay:
+    <<: *app
+    command: ["python", "-m", "shopdesk.agent.dead_letters", "--loop", "60"]
+    healthcheck: {disable: true}
+    depends_on:
+      app: {condition: service_healthy}
+
+  # GDPR storage limitation: deletes idle conversations, trims history, once a day.
+  retention:
+    <<: *app
+    command: ["sh", "-c", "while true; do python -m shopdesk.retention; sleep 86400; done"]
+    healthcheck: {disable: true}
+    depends_on:
+      app: {condition: service_healthy}
+
   postgres:
     image: postgres:17-alpine
+    profiles: ["postgres"]
     environment:
       POSTGRES_USER: shopdesk
       POSTGRES_PASSWORD: shopdesk
       POSTGRES_DB: shopdesk
     ports:
       - "5433:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U shopdesk"]
       interval: 2s
       retries: 20
+
+volumes:
+  shopdesk-data:
+  postgres-data:

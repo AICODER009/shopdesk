@@ -19,7 +19,7 @@ solved.
 ![Langfuse](https://img.shields.io/badge/Langfuse-EU-0A0A0A)
 ![React](https://img.shields.io/badge/widget-React%2018-61DAFB?logo=react&logoColor=black)
 <br>
-![tests](https://img.shields.io/badge/tests-147%20passing-2f9e62)
+![tests](https://img.shields.io/badge/tests-146%20passing-2f9e62)
 ![coverage](https://img.shields.io/badge/coverage-89%25-2f9e62)
 ![evals](https://img.shields.io/badge/live%20evals-21%2F21-2f9e62)
 ![mypy](https://img.shields.io/badge/mypy-strict-2f9e62)
@@ -31,6 +31,8 @@ solved.
 </div>
 
 ---
+
+> **Guides:** [Architecture (high & low level)](docs/ARCHITECTURE.md) · [Running & deployment (Docker, local, production)](docs/RUNNING.md)
 
 ## Contents
 
@@ -65,26 +67,26 @@ solved.
 ```mermaid
 flowchart LR
     subgraph Shop["🛍️ Shop website"]
-        W["Chat widget<br/><sub>React · Shadow DOM</sub>"]
-        T["Token endpoint<br/><sub>signs shopper JWT</sub>"]
+        W["Chat widget<br/>React · Shadow DOM"]
+        T["Token endpoint<br/>signs shopper JWT"]
     end
 
     subgraph API["⚙️ shopdesk API · FastAPI"]
         R["/v1/chat<br/>/v1/conversations"]
-        S["ChatService<br/><sub>thread scoping · locks · takeover</sub>"]
+        S["ChatService<br/>thread scoping · locks · takeover"]
         G[["LangGraph<br/>agent"]]
-        H["Handback poller<br/><sub>+ webhook</sub>"]
+        H["Handback poller<br/>+ webhook"]
     end
 
     subgraph AI["🧠 Models"]
-        O["OpenAI<br/><sub>gpt-5.6-sol · primary</sub>"]
-        A["Anthropic<br/><sub>Claude · fallback</sub>"]
-        GD["Injection guard<br/><sub>gpt-5.4-mini</sub>"]
+        O["OpenAI<br/>gpt-5.6-sol · primary"]
+        A["Anthropic<br/>Claude · fallback"]
+        GD["Injection guard<br/>gpt-5.4-mini"]
     end
 
     subgraph Data["🗄️ Data"]
-        Q[("Qdrant<br/><sub>help centre<br/>dense + BM25</sub>")]
-        DB[("SQLite / Postgres<br/><sub>checkpoints · encrypted tokens<br/>dead letters · open handoffs</sub>")]
+        Q[("Qdrant<br/>help centre<br/>dense + BM25")]
+        DB[("SQLite / Postgres<br/>checkpoints · encrypted tokens<br/>dead letters · open handoffs")]
         C["Shop order API"]
     end
 
@@ -119,32 +121,28 @@ own retry policy, timeout and error handler, so a failure goes down a defined pa
 of crashing the conversation.
 
 ```mermaid
-stateDiagram-v2
-    direction LR
-    [*] --> guard
-    guard --> blocked: obvious injection
-    guard --> agent: clean / flagged
-    blocked --> [*]
+flowchart TD
+    start((message)) --> guard["guard<br/>redact cards · injection screen"]
+    guard -- "obvious injection" --> blocked(["blocked: safe reply, no model call"])
+    guard -- "clean / flagged" --> agent["agent<br/>LLM call · RetryPolicy · 90 s timeout"]
+    agent -- "tool calls" --> tools["tools<br/>KB search · orders · account"]
+    tools -- "results + sources" --> agent
+    agent -- "final JSON reply" --> finalize["finalize<br/>citation + leak checks"]
+    finalize -- "one repair round" --> agent
+    finalize -- "valid" --> answered(["answered with sources"])
+    tools -- "handoff_to_human" --> handoff["handoff<br/>Zendesk ticket · Idempotency-Key"]
+    agent -. "error_handler: AI down, signed in" .-> handoff
+    agent -. "refusal / truncation" .-> safe(["safe reply"])
+    tools -. "step budget spent" .-> safe
+    handoff -- "ticket created" --> awaiting["await_human<br/>interrupt()"]
+    handoff -. "error_handler: Zendesk down" .-> dlq[("dead-letter queue")]
+    dlq -. "replayed later" .-> awaiting
+    awaiting -- "solved: webhook or poller" --> back(["back with the bot"])
 
-    state "agent<br/><sub>LLM call · RetryPolicy · 90s timeout</sub>" as agent
-    agent --> tools: tool calls
-    agent --> finalize: final JSON reply
-    agent --> handoff: error_handler<br/>(AI down, signed in)
-    agent --> [*]: refusal / truncation<br/>→ safe reply
-
-    tools --> agent: results (+ sources)
-    tools --> handoff: handoff_to_human
-    tools --> [*]: step budget spent
-
-    finalize --> agent: one repair round<br/>(bad citation, leak)
-    finalize --> [*]: answered ✓
-
-    state "handoff<br/><sub>Zendesk · RetryPolicy · Idempotency-Key</sub>" as handoff
-    handoff --> await_human: ticket created
-    handoff --> await_human: error_handler →<br/>dead-letter queue
-
-    state "await_human<br/><sub>interrupt()</sub>" as await_human
-    await_human --> [*]: ticket solved → resume
+    classDef node fill:#eef6f2,stroke:#1f4d3f,color:#173d32
+    classDef end_ fill:#fdf3ec,stroke:#b5653d,color:#7a3f22
+    class guard,agent,tools,finalize,handoff,awaiting node
+    class blocked,answered,safe,back end_
 ```
 
 <details>
@@ -209,12 +207,12 @@ idempotency key, and adds anything the customer wrote in the meantime.
 
 ```mermaid
 flowchart LR
-    D["Help centre<br/><sub>Markdown · Notion</sub>"] --> CH["Heading-aware<br/>recursive chunker<br/><sub>~350 tokens · 50 overlap</sub>"]
+    D["Help centre<br/>Markdown · Notion"] --> CH["Heading-aware<br/>recursive chunker<br/>~350 tokens · 50 overlap"]
     CH --> QZ{"Injection<br/>scan"}
     QZ -- "poisoned" --> X["quarantined"]
-    QZ -- "clean" --> E["Embed<br/><sub>text-embedding-3-large (1024)<br/>+ BM25</sub>"]
+    QZ -- "clean" --> E["Embed<br/>text-embedding-3-large (1024)<br/>+ BM25"]
     E --> QD[("Qdrant")]
-    Q["Customer question"] --> HY["Hybrid search<br/><sub>dense + sparse · RRF</sub>"]
+    Q["Customer question"] --> HY["Hybrid search<br/>dense + sparse · RRF"]
     QD --> HY
     HY --> F{"cosine ≥ 0.2?"}
     F -- "no" --> NR["No results →<br/>model declines"]
@@ -315,6 +313,16 @@ described above. "Did it decline?" is graded by a small LLM judge, not string ma
 
 ## Quickstart
 
+**Docker** (everything in one command, SQLite on a volume):
+
+```bash
+cp .env.example .env            # add OPENAI_API_KEY, QDRANT_URL, QDRANT_API_KEY
+docker compose up -d --build
+docker compose run --rm app python -m shopdesk.rag.ingest --markdown kb
+```
+
+**Local** (for development):
+
 ```bash
 uv sync
 (cd widget && npm ci && npm run build)                # builds the chat widget
@@ -392,7 +400,7 @@ See [`.env.example`](.env.example) for every option.
 ## Tests
 
 ```bash
-uv run pytest --cov                                    # 147 tests
+uv run pytest --cov                                    # 146 tests
 uv run ruff check src tests evals && uv run mypy src   # strict typing
 cd widget && npm test                                  # 16 widget tests
 ```

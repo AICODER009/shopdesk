@@ -7,3 +7,7 @@
 .mypy_cache
 .ruff_cache
 src/shopdesk/static/widget
+data/*.db
+data/*.db-*
+.claude
+docs/*.psd

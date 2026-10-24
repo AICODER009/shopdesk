@@ -1,4 +1,4 @@
-"""Runs against a real Postgres: `docker compose up -d postgres` then
+"""Runs against a real Postgres: `docker compose --profile postgres up -d postgres` then
 TEST_DATABASE_URL=postgresql://shopdesk:shopdesk@localhost:5433/shopdesk pytest -m postgres"""
 
 import os

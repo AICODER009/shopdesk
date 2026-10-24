@@ -43,3 +43,21 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t shopdesk:ci .
+      - name: Smoke test the container
+        run: |
+          docker run -d --name shopdesk -p 8000:8000             -e ENV=dev -e OPENAI_API_KEY=sk-test -e QDRANT_URL=:memory:             -e EMBEDDING_PROVIDER=local -e FALLBACK_PROVIDER=none             -e DATABASE_URL=sqlite:///data/shopdesk.db shopdesk:ci
+          for i in $(seq 1 30); do
+            curl -fsS localhost:8000/healthz && break || sleep 2
+          done
+          curl -fsS localhost:8000/healthz
+          curl -fsS -o /dev/null localhost:8000/widget/shopdesk-widget.js
+          curl -fsS localhost:8000/dev/storefront | grep -q "shopdesk-widget.js"
+          docker exec shopdesk test -f /app/data/shopdesk.db
+      - if: failure()
+        run: docker logs shopdesk
